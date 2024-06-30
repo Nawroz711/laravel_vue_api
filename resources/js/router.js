@@ -18,6 +18,11 @@ const router = createRouter({
       name: 'Todos',
       component: () => import('./src/components/Todos/Todos.vue'),
     },
+    {
+      path: '/add_todo',
+      name: 'AddTodo',
+      component: () => import('./src/components/Todos/AddTodo.vue'),
+    },
   ]
 })
 

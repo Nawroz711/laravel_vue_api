@@ -6,15 +6,16 @@ use App\Http\Requests\AuthRequests;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
     public function signup(AuthRequests $request)
     {
         $data = $request->all();
-       $x = $request->validated($data);
+        $x = $request->validated($data);
 
-       User::create($data);
+        User::create($data);
 
         return response()->json($data);
     }
@@ -24,15 +25,26 @@ class AuthController extends Controller
 
         $data = $request->all();
 
-        if($data)
-        {
-            if(Auth::attempt($data))
-            {
+        if ($data) {
+            if (Auth::attempt($data)) {
                 $user = Auth::user();
                 $user['token'] =  $user->createToken('auth_token')->plainTextToken;
+                return response()->json($user);
+            } else {
+                return response()->json([
+                    'message' => 'Credentials didnt match!'
+                ], 404);
             }
         }
+    }
 
-        return response()->json($user);
+    // logout method
+    public function logout(Request $request)
+    {
+        $user_id = auth()->id();
+        $user = User::find($user_id);
+        $user->tokens()->delete();
+
+
     }
 }

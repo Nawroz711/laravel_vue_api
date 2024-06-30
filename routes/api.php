@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use GuzzleHttp\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,3 +23,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/signup' , [AuthController::class ,  'signup']);
 Route::post('/signin' , [AuthController::class ,  'signin']);
+
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/logout' , [AuthController::class , 'logout']);
+});
