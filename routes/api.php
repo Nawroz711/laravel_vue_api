@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TodoController;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
@@ -27,4 +28,8 @@ Route::post('/signin' , [AuthController::class ,  'signin']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout' , [AuthController::class , 'logout']);
+
+    Route::post('/todo/create' , [TodoController::class , 'create']);
+    Route::get('/todos' , [TodoController::class , 'index']);
+    Route::get('/download/file/{file}' , [TodoController::class , 'downloadFile']);
 });

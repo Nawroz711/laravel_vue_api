@@ -41,7 +41,6 @@ const auth_token = ref(localStorage.getItem('auth_token'))
 
 const router = useRouter();
 const logout = async () => {
-    console.log(JSON.stringify(auth_token.value));
     try {
         await axios.post('api/logout' , {token: auth_token.value} , {
             headers: {
