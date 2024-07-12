@@ -23,6 +23,11 @@ const router = createRouter({
       name: 'AddTodo',
       component: () => import('./src/components/Todos/AddTodo.vue'),
     },
+    {
+      path: '/edit_todo/',
+      name: 'EditTodo',
+      component: () => import('./src/components/Todos/EditTodo.vue'),
+    },
   ]
 })
 

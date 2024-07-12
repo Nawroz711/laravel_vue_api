@@ -8,7 +8,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'primevue/resources/themes/lara-light-indigo/theme.css'
 import 'primevue/resources/primevue.min.css'
+import ToastService from 'primevue/toastservice';
 
 
 
-createApp(App).use(router).use(PrimeVue).mount("#app")
+createApp(App).use(router).use(PrimeVue).use(ToastService).mount("#app")

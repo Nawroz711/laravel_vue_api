@@ -92,9 +92,7 @@ const submitForm = async () => {
     errors.value = e.response.data.errors
   }
   finally {
-    setTimeout(() => {
-      router.push({ name: 'Todos' });
-    }, 2000)
+    router.push({name: 'Todos'})
   }
 };
 </script>
