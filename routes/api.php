@@ -31,7 +31,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('/todo/create' , [TodoController::class , 'create']);
     Route::get('/todos' , [TodoController::class , 'index']);
+    Route::get('/todos/bin' , [TodoController::class , 'deletedTodos']);
     Route::post('/todos/search' , [TodoController::class , 'search']);
     Route::post('/todos/delete' , [TodoController::class , 'destroy']);
+    Route::post('/todos/force_delete' , [TodoController::class , 'forceDelete']);
     Route::get('/download/file/{file}' , [TodoController::class , 'downloadFile']);
+    Route::get('/todos/edit/{id}' , [TodoController::class , 'edit']);
+    Route::post('/todos/update' , [TodoController::class ,  'update']);
+    Route::post('/todos/restore' , [TodoController::class ,  'restore']);
 });

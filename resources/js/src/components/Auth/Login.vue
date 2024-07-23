@@ -13,7 +13,8 @@
                         <label for="" class="form-label">password</label>
                         <input type="password" v-model="form_data.password" name="" id="" class="form-control"
                             placeholder="" aria-describedby="helpId" />
-                        <button class="btn btn-primary mt-3" type="submit">login</button>
+                        <button class="btn btn-primary mt-5 w-100" type="submit">login</button>
+                        <button class="btn btn-danger mt-2 w-100" type="submit">login with Google</button>
                     </div>
 
                     <router-link :to="{ name: 'Signup' }">create an account</router-link>

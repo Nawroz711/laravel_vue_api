@@ -1,8 +1,12 @@
 <template>
     <Navbar />
     <div v-if="data">
-        <DataTable v-model:selection="selectedProduct" ref="dt"
-            class="p-4" stripedRows removableSort :value="data.data" tableStyle="min-width: 50rem">
+        <h4 class="px-4 py-3 text-primary">Recycle bin</h4>
+        <div v-if="data['data'] == ''" class="text-center mt-5">
+            <h3 class="text-primary">No Data Found!</h3>
+        </div>
+        <DataTable v-else v-model:selection="selectedTodos" ref="dt" class="p-4" stripedRows removableSort :value="data.data"
+            tableStyle="min-width: 50rem">
 
             <template #header>
                 <div class="d-flex justify-content-between">
@@ -12,18 +16,23 @@
                         <button class="btn btn-sm btn-primary rounded-0 px-4" type="submit">search</button>
                     </form>
                     <div style="text-align: left" class="">
-                        <button class="btn btn-primary btn-sm px-3" @click="exportCSV($event)">Export file</button>
-                        <router-link :to="{ name: 'AddTodo' }">
-                            <button class="btn btn-success btn-sm px-3 mx-2">Create new</button>
-                        </router-link>
+                        <button class="btn btn-primary btn-sm px-3 mx-2" @click.prevent="restore()">Restore</button>
+                        <button class="btn btn-danger btn-sm px-3 mx-2" @click.prevent="deleteRecords()">Empty Bin</button>
                     </div>
 
                 </div>
 
                 <!-- delete option -->
-                <div v-if="selectedProduct.length > 0" class="my-2 mx-2 d-flex justify-content-end">
-                    <button @click.prevent="deleteRecords()" class="btn btn-sm btn-danger">Delete {{
-                        selectedProduct.length }} records!</button>
+                <div class="d-flex justify-content-end">
+                    <div v-if="selectedTodos.length > 0" class="my-2 mx-2 d-flex justify-content-end">
+                        <button @click.prevent="deleteRecords()" class="btn btn-sm btn-danger">Delete {{
+                            selectedTodos.length }} records!</button>
+                    </div>
+                    <!-- restore options -->
+                    <div v-if="selectedTodos.length > 0" class="my-2 mx-2 d-flex justify-content-end">
+                        <button @click.prevent="restore()" class="btn btn-sm btn-primary">Restore {{
+                            selectedTodos.length }} records!</button>
+                    </div>
                 </div>
 
             </template>
@@ -43,13 +52,6 @@
                     <button @click.prevent="downloadFile(data.attachments)" v-if="data.attachments"
                         class="btn btn-sm btn-success rounded px-3 mx-auto d-block">Download</button>
                     <small v-else class="text-center d-block">No file!</small>
-                </template>
-            </Column>
-            <Column style="width: 1%">
-                <template #body="{ data }">
-                    <small class="text-bold cursor-pointer" @click.prevent="edit = true">
-                        <router-link :to="{name: 'EditTodo' , params: {id: data.id}}">Edit</router-link>
-                    </small>
                 </template>
             </Column>
             <template #footer>
@@ -94,16 +96,11 @@ const show = () => {
 
 const edit = ref(false)
 const loading = ref(true)
-const selectedProduct = ref([]);
+const selectedTodos = ref([]);
 const message = ref()
 
 const searchInput = ref(null);
 
-const dt = ref();
-const products = ref();
-const exportCSV = () => {
-    dt.value.exportCSV();
-};
 
 const auth_token = ref(localStorage.getItem('auth_token'));
 const data = ref();
@@ -113,11 +110,12 @@ const getData = async (page = page_number.value) => {
     data.value = '';
     error_message.value = ''
     try {
-        await axios.get(`api/todos/?page=${page}`, {
+        await axios.get(`/api/todos/bin/?page=${page}`, {
             headers: {
                 Authorization: 'Bearer ' + auth_token.value
             }
         }).then((res) => {
+            console.log(res.data['data']);
             data.value = res.data;
             page_number.value = page;
         })
@@ -161,31 +159,16 @@ const search = async (page = page_number.value) => {
 }
 
 
-const downloadFile = async (file) => {
-    try {
-        await axios.get(`api/download/file/${file}`, {
-            headers: {
-                Authorization: 'Bearer ' + auth_token.value
-            }
-        }).then((res) => {
-            console.log(res.data);
-        })
-    }
-    catch (e) {
-        console.log(e);
-    }
-}
-
 // DELETE METHOD
+const config = {
+    headers: {
+        Authorization: 'Bearer ' + auth_token.value
+    }
+};
 
 const deleteRecords = async () => {
-    const config = {
-        headers: {
-            Authorization: 'Bearer ' + auth_token.value
-        }
-    };
 
-    let uniqueArray = [...new Set(selectedProduct.value)];
+    let uniqueArray = [...new Set(selectedTodos.value)];
 
     let delete_ids = [];
     uniqueArray.forEach((item) => {
@@ -193,13 +176,13 @@ const deleteRecords = async () => {
     })
 
     try {
-        await axios.post('api/todos/delete', delete_ids, config)
+        await axios.post('/api/todos/force_delete', delete_ids , config)
             .then((res) => {
                 console.log(res.status);
                 if (res.status == 200) {
                     message.value = res.data.message;
                     show();
-                    selectedProduct.value = ''
+                    selectedTodos.value = ''
 
                 }
             })
@@ -230,9 +213,29 @@ const getSeverity = (priority) => {
     }
 }
 
-const form_data = ref({
-    'title' : '',
-})
+// RESTORE DELETED DATA
+const restore = async () => {
+    let uniqueArray = [...new Set(selectedTodos.value)];
+
+    let restore_ids = [];
+    uniqueArray.forEach((item) => {
+        restore_ids.push(item['id'])
+    })
+    try {
+        await axios.post('/api/todos/restore', restore_ids, config).then((res) => {
+            if(res.status == 200)
+            {
+                getData();
+            }
+        })
+    }
+    catch (e) {
+        console.log(e);
+    }
+    finally {
+        selectedTodos.value = [];
+    }
+}
 
 onMounted(() => {
     getData();

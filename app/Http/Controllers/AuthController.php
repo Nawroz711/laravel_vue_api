@@ -13,11 +13,23 @@ class AuthController extends Controller
     public function signup(AuthRequests $request)
     {
         $data = $request->all();
-        $x = $request->validated($data);
+        $request->validated($data);
 
-        User::create($data);
+        $account_created = User::create($data);
 
-        return response()->json($data);
+        if ($account_created) {
+            if (Auth::attempt($data)) {
+                $user = Auth::user();
+                $user['token'] =  $user->createToken('auth_token')->plainTextToken;
+                return response()->json($user);
+            } else {
+                return response()->json([
+                    'message' => 'Credentials didnt match!'
+                ], 404);
+            }
+        }
+
+        // return response()->json($data);
     }
 
     public function signin(Request $request)

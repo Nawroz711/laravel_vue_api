@@ -19,6 +19,11 @@
                             <span>New Todo</span>
                         </router-link>
                     </li>
+                    <li class="nav-item">
+                        <router-link class="nav-link"  :to="{name: 'BinTodos'}">
+                            <span>Bins</span>
+                        </router-link>
+                    </li>
                 </ul>
                 <form @submit.prevent="logout()" class="d-flex my-2 my-lg-0">
                     <button class="btn btn-outline-light my-2 my-sm-0" type="submit">

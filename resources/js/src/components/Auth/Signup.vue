@@ -14,7 +14,7 @@
                         <small v-if="errors?.email">{{ errors.email[0] }}</small> <br>
             
                         <label for="" class="form-label">password</label>
-                        <input type="text" v-model="form_data.password" name="" id="" class="form-control" placeholder="" aria-describedby="helpId" /> 
+                        <input type="password" v-model="form_data.password" name="" id="" class="form-control" placeholder="" aria-describedby="helpId" /> 
                         <small v-if="errors?.password">{{ errors.password[0] }}</small>
             
                     </div>
@@ -32,6 +32,9 @@
 <script setup>
 import axios from 'axios';
 import {ref} from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const form_data = ref({
     name : '',
@@ -44,15 +47,14 @@ const errors = ref()
 const submitForm  = async () => {
     try{
         await axios.post('api/signup' , form_data.value)
-        .then(res => {
-            console.log(res.data);
+        .then((res) => {
+            localStorage.setItem('auth_token', res.data.token)
+            router.push({name: 'Todos'});
         })
     }
     catch(e)
     {
-        console.log(e.response.data.errors);
         errors.value = e.response.data.errors;
-        
         
     }
 }

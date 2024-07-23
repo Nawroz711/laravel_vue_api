@@ -24,10 +24,21 @@ const router = createRouter({
       component: () => import('./src/components/Todos/AddTodo.vue'),
     },
     {
-      path: '/edit_todo/',
+      path: '/edit_todo/:id',
       name: 'EditTodo',
       component: () => import('./src/components/Todos/EditTodo.vue'),
     },
+    {
+      path: '/todos/bins',
+      name: 'BinTodos',
+      component: () => import('./src/components/Todos/BinTodo.vue'),
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('./src/utils/NotFound.vue'),
+    },
+
   ]
 })
 
