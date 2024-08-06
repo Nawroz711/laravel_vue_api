@@ -47,7 +47,7 @@ const auth_token = ref(localStorage.getItem('auth_token'))
 const router = useRouter();
 const logout = async () => {
     try {
-        await axios.post('api/logout' , {token: auth_token.value} , {
+        await axios.get('api/logout' , {token: auth_token.value} , {
             headers: {
                 Authorization : 'Bearer ' + auth_token.value
             }

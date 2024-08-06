@@ -51,7 +51,7 @@ class AuthController extends Controller
     }
 
     // logout method
-    public function logout(Request $request)
+    public function logout()
     {
         $user_id = auth()->id();
         $user = User::find($user_id);

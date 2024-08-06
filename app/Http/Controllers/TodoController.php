@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TodosExport;
 use App\Http\Requests\Todo;
+use App\Imports\TodosImport;
 use App\Models\todo as ModelsTodo;
 use Illuminate\Contracts\Cache\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 use function PHPUnit\Framework\isEmpty;
 
@@ -17,7 +20,7 @@ class TodoController extends Controller
     public function index()
     {
         $user_id = auth()->id();
-        $data = ModelsTodo::where('user_id', $user_id)->paginate(6);
+        $data = ModelsTodo::where('user_id', $user_id)->paginate(5);
 
         return response()->json($data);
     }
@@ -192,4 +195,20 @@ class TodoController extends Controller
             'message' =>  'Records restored successfully!',
         ], 200);
     }
+
+    // Export excel file of Todos records
+    public function exportData()
+    {
+        return Excel::download(new TodosExport, 'invoices.pdf', \Maatwebsite\Excel\Excel::DOMPDF);
+    }
+    // Export excel file of Todos records
+    public function importData(Request $request)
+    {
+        $file = $request->file('file');
+        Excel::import(new TodosImport, $file);
+
+        
+        return response()->json([
+            'message' =>  'Data imported successfully!',
+        ], 200);    }
 }

@@ -27,7 +27,7 @@ Route::post('/signin' , [AuthController::class ,  'signin']);
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/logout' , [AuthController::class , 'logout']);
+    Route::get('/logout' , [AuthController::class , 'logout']);
 
     Route::post('/todo/create' , [TodoController::class , 'create']);
     Route::get('/todos' , [TodoController::class , 'index']);
@@ -39,4 +39,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/todos/edit/{id}' , [TodoController::class , 'edit']);
     Route::post('/todos/update' , [TodoController::class ,  'update']);
     Route::post('/todos/restore' , [TodoController::class ,  'restore']);
+    Route::get('/todos/report/download' , [TodoController::class ,  'exportData']);
+    Route::post('/todos/report/import' , [TodoController::class ,  'importData']);
 });

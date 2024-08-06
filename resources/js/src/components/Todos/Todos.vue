@@ -1,8 +1,13 @@
 <template>
     <Navbar />
+
+    <div class="spinner-border text-center text-primary d-block mx-auto my-4" role="status" v-if="loading">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+
     <div v-if="data">
-        <DataTable v-model:selection="selectedProduct" ref="dt"
-            class="p-4" stripedRows removableSort :value="data.data" tableStyle="min-width: 50rem">
+        <DataTable v-model:selection="selectedProduct" ref="dt" class="p-4" stripedRows removableSort :value="data.data"
+            tableStyle="min-width: 50rem">
 
             <template #header>
                 <div class="d-flex justify-content-between">
@@ -12,7 +17,11 @@
                         <button class="btn btn-sm btn-primary rounded-0 px-4" type="submit">search</button>
                     </form>
                     <div style="text-align: left" class="">
-                        <button class="btn btn-primary btn-sm px-3" @click="exportCSV($event)">Export file</button>
+                        <button class="btn btn-primary btn-sm mx-3" @click.prevent="downloadReport()">Export
+                            Report</button>
+                        <button class="btn btn-primary btn-sm mx-3" @click.prevent="importReport()">Import
+                            Report</button>
+                        <input type="file" @change="selectFile" name="" id="">
                         <router-link :to="{ name: 'AddTodo' }">
                             <button class="btn btn-success btn-sm px-3 mx-2">Create new</button>
                         </router-link>
@@ -48,7 +57,7 @@
             <Column style="width: 1%">
                 <template #body="{ data }">
                     <small class="text-bold cursor-pointer" @click.prevent="edit = true">
-                        <router-link :to="{name: 'EditTodo' , params: {id: data.id}}">Edit</router-link>
+                        <router-link :to="{ name: 'EditTodo', params: { id: data.id } }">Edit</router-link>
                     </small>
                 </template>
             </Column>
@@ -93,17 +102,11 @@ const show = () => {
 };
 
 const edit = ref(false)
-const loading = ref(true)
+const loading = ref(false)
 const selectedProduct = ref([]);
 const message = ref()
 
 const searchInput = ref(null);
-
-const dt = ref();
-const products = ref();
-const exportCSV = () => {
-    dt.value.exportCSV();
-};
 
 const auth_token = ref(localStorage.getItem('auth_token'));
 const data = ref();
@@ -176,6 +179,23 @@ const downloadFile = async (file) => {
     }
 }
 
+// Download excel file:
+
+const downloadReport = async () => {
+    try {
+        await axios.get("/api/todos/report/download", {
+            headers: {
+                Authorization: 'Bearer ' + auth_token.value
+            }
+        }).then((res) => {
+            console.log(res.data);
+        })
+    }
+    catch (e) {
+        console.log(e);
+    }
+}
+
 // DELETE METHOD
 
 const deleteRecords = async () => {
@@ -231,13 +251,54 @@ const getSeverity = (priority) => {
 }
 
 const form_data = ref({
-    'title' : '',
+    'title': '',
 })
 
 onMounted(() => {
     getData();
 })
 
+
+// import data for generting excel file
+function selectFile(e) {
+    form_data.value.attachments = e.target.files[0];
+}
+
+
+const importReport = async () => {
+    loading.value = true;
+    const config = {
+        headers: {
+            'content-type': 'multipart/form-data',
+            Authorization: 'Bearer ' + auth_token.value
+        }
+    };
+
+    const data = new FormData();
+    data.append('file', form_data.value.attachments);
+
+    try {
+        await axios.post('/api/todos/report/import', data, config)
+            .then((res) => {
+                if (res.status == 200) {
+                    console.log(res.data);
+                    message.value = res.data.message;
+                    show();
+
+                    setTimeout(() => {
+                        getData();
+                    }, 1000);
+                }
+
+            })
+    } catch (e) {
+        console.log(e);
+        // errors.value = e.response.data.errors
+    }
+    finally {
+        loading.value = false
+    }
+};
 </script>
 
 <style scoped>
