@@ -5,31 +5,40 @@ namespace App\Imports;
 use App\Models\Todo;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithBatchInserts;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Maatwebsite\Excel\Concerns\WithValidation;
+use PhpOffice\PhpSpreadsheet\Worksheet\AutoFilter\Column\Rule;
 
-class TodosImport implements WithMultipleSheets
+class TodosImport implements ToModel, WithValidation, WithHeadingRow, WithBatchInserts, WithChunkReading
 {
+    public function model(array $row)
+    {
+        return new Todo([
+            'user_id' => auth()->id(),
+            'title' => $row['title'],
+            'description' => $row['description'] ?? $row['desc'] ?? null,
+            'priority' => $row['priority'],
+        ]);
+    }
 
-    public function sheets(): array
+    public function rules(): array
     {
         return [
-          0 =>  new FirstSheet(),
-          1 =>  new SecondSheet(),
+            'title' => 'numeric',
+            'description' => 'required',
         ];
     }
-    /**
-    * @param array $row
-    *
-    * @return \Illuminate\Database\Eloquent\Model|null
-    */
-    // public function model(array $row)
-    // {
-    //     return new Todo([
-    //         'user_id' => auth()->id(),
-    //         'title' => $row['title'],
-    //         'description' => $row['description'] ?? $row['desc'] ?? null,
-    //         'priority' => $row['priority'],
-    //     ]);
-    // }
+
+    public function batchSize(): int
+    {
+        return 1;
+    }
+
+    public function chunkSize(): int
+    {
+        return 1;
+    }
 }

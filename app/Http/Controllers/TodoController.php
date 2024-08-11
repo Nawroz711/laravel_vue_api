@@ -199,7 +199,7 @@ class TodoController extends Controller
     // Export excel file of Todos records
     public function exportData()
     {
-        return Excel::download(new TodosExport, 'invoices.pdf', \Maatwebsite\Excel\Excel::DOMPDF);
+        return (new TodosExport)->download('invoices.xlsx');
     }
     // Export excel file of Todos records
     public function importData(Request $request)
